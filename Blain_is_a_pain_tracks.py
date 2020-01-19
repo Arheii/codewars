@@ -38,13 +38,13 @@ SNAIL = """\
     /---------------------\\               /-\\ /-\\  
    //---------------------\\\\              | | | |  
   //  /-------------------\\\\\\             | / | /  
+\\----------------------------------------------/ 
   ||  |/------------------\\\\\\\\            |/  |/   
   ||  ||                   \\\\\\\\           ||  ||   
   \\\\  ||                   | \\\\\\          ||  ||   
    \\\\-//                   | || \\---------/\\--/|   
 /-\\ \\-/                    \\-/|                |   
 |  \\--------------------------/                |   
-\\----------------------------------------------/ 
 """
 SHORT = """\
 /----\\     /----\\ 
@@ -168,6 +168,8 @@ def check_start_crash(a_train, b_train):
 def crash(a_train, b_train):
     if a_train[0] in b_train or b_train[0] in a_train:
         return True
+    elif a_train[0] in a_train[1:] or b_train[0] in b_train[1:]:
+        return True
     else:
         return False
 
@@ -189,14 +191,14 @@ def train_crash(track, a_train, a_train_pos, b_train, b_train_pos, limit):
     for i in range(1, limit + 1):
         A.tuh_tuh()
         B.tuh_tuh()
-        if crash(A.train, B.train):
-            print_track(track, A.train, B.train, A.name, B.name)
+        print_track(track, A.train, B.train, A.name, B.name)
+        if crash(A.train, B.train):           
             return i
-#        time.sleep(0.4)        
+        time.sleep(0.1)        
     return -1
 
 #print(train_crash(TRACK_EX, "Aaaa", 0, "Bbbbbbbbbbb", 0, 1))
 #print(train_crash(TRACK_EX, "Aaaa", 147, "Bbbbbbbbbbb", 288, 1000))
 #print(train_crash(TRACK_EX, "Xxxxxxx", 115, "Cccc", 146, 1000))
-#print(train_crash(SNAIL, "ddddddddddD", 10, "Xxxxx", 162, 1000))
-print(train_crash(SHORT, "Aaaaaaaaaaaaaaaaaaaaaaa", 9, "Ee", 41, 1000))
+print(train_crash(SNAIL, "ddddddddddD", 10, "Xxxxx", 162, 1000))
+#print(train_crash(SHORT, "Aaaaaaaaaaaaaaaaaaaaaaa", 9, "Ee", 41, 1000))
