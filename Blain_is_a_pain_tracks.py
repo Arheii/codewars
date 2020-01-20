@@ -34,18 +34,31 @@ TRACK_EX = """\
               |                            |               
               \\----------------------------/ 
 """
-RABBIT = """\
+SNAIL = """\
     /---------------------\\               /-\\ /-\\  
    //---------------------\\\\              | | | |  
   //  /-------------------\\\\\\             | / | /  
+\\----------------------------------------------/ 
   ||  |/------------------\\\\\\\\            |/  |/   
   ||  ||                   \\\\\\\\           ||  ||   
   \\\\  ||                   | \\\\\\          ||  ||   
    \\\\-//                   | || \\---------/\\--/|   
 /-\\ \\-/                    \\-/|                |   
 |  \\--------------------------/                |   
-\\----------------------------------------------/ 
 """
+SHORT = """\
+/----\\     /----\\ 
+|     \\   /     | 
+|      \\ /      | 
+|       S       | 
+|      / \\      | 
+|     /   \\     | 
+\\----/     \\----/
+"""
+
+
+
+
 
 def print_track(track, a_train, b_train, a_name, b_name):
     """ print track with trains for debug"""
@@ -73,32 +86,28 @@ def print_track(track, a_train, b_train, a_name, b_name):
 def gen_coords(track, old, cur):
     """ return next coords track """
     while True:
-        x, y = [i + (i - j) for i, j in zip(cur, old)]
-        if track[x][y] != ' ':    # check next in line
-            old, cur = cur, [x, y]
-            # situation   /
-            #           --+-
-            if track[old[0]][old[1]] == '\\'  or track[old[0]][old[1]] == '/':
-                if track[x][y] == '-':
-                    if track[x][y + 1] == '+':
-                        cur = [x, y + 1]
-                    if track[x][y - 1] == '+':
-                        cur = [x, y - 1]
-        else:                               # check other 4 invariants
-            dif = [i - j for i, j in zip(cur, old)]
-            if 0 in dif:
-                dx, dy = [[i, i + j] if j else [i - 1, i + 1] for i, j in zip(cur, dif)]
-                koords = product(dx, dy)
-            else:
-                dx, dy = dif
-                koords = [[x, y - dy], [x, y - 2 * dy], [x - dx, y], [x - 2 * dx, y]]
-                
-            for x, y in koords:
-                if track[x][y] != ' ':
-                    old, cur = cur, [x, y]
-            
-        yield cur
+        x, y = cur
+        dx, dy = [x - old[0], y - old[1]]
+        nx, ny = x + dx, y + dy
+        tc = track[x][y]
         
+        if tc in '|-SX+':
+            new = [nx, ny]
+        else:
+            if tc == '/':  k = 1
+            else:          k = -1
+            
+            if dy and (track[x - dy * k][y] not in ' /\\-'):
+                new = [x - dy * k, y]
+            elif dx and (track[x][y - dx * k] not in ' /\\|'):
+                new = [x, y - dx * k]
+            else:
+                if dx:  new = [x + dx, y - dx * k]
+                else:   new = [x - dy * k, y + dy]
+                
+        old, cur = cur, new
+        yield cur
+
 
 class Train():
     def __init__(self, train, train_pos, track, zero_pos):
@@ -115,16 +124,22 @@ class Train():
             
     def _move_to_start(self, train_pos, zero_pos):
         """Move all train to start positions and return train"""
-        g =  gen_coords(self.track, [1, zero_pos - 1], [1, zero_pos])
+        # fint for search previous position for zero
+        g = gen_coords(self.track, [1, zero_pos + 1], [1, zero_pos])
+        previous = next(g)
+        g = gen_coords(self.track, previous, [1, zero_pos])
+        
         for i in range(train_pos - 1):
-            next(g)            
-        engine = next(g)
+            next(g)
+        if train_pos == 0:
+            engine = [1, zero_pos]
+        else:
+            engine = next(g)
         train = [engine]
         if self.clockwise: 
             g = gen_coords(self.track, next(g), engine) 
-        for i in range(1, self.n):
-            train.append(next(g))
-                
+        for _ in range(1, self.n):
+            train.append(next(g))                
         return train
 
         
@@ -153,6 +168,8 @@ def check_start_crash(a_train, b_train):
 def crash(a_train, b_train):
     if a_train[0] in b_train or b_train[0] in a_train:
         return True
+    elif a_train[0] in a_train[1:] or b_train[0] in b_train[1:]:
+        return True
     else:
         return False
 
@@ -162,27 +179,26 @@ def train_crash(track, a_train, a_train_pos, b_train, b_train_pos, limit):
     maxl = max([len(line) for line in track]) + 1
     track = [' ' + line + ' ' * (maxl - len(line)) for line in track]
     track.insert(0, " " * len(track[0]))
-    track.append(" " * len(track[1]))   
-    zero_pos = track[1].find('/')  
-    
+    track.append(" " * len(track[1]))
+    zero_pos = track[1].find('/')
+
     A = Train(a_train, a_train_pos, track, zero_pos)
     B = Train(b_train, b_train_pos, track, zero_pos)
+    print_track(track, A.train, B.train, A.name, B.name)
     if check_start_crash(A.train, B.train):
         return  0
-    print_track(track, A.train, B.train, A.name, B.name)
+
     for i in range(1, limit + 1):
         A.tuh_tuh()
         B.tuh_tuh()
-#        if i == 185:
         print_track(track, A.train, B.train, A.name, B.name)
-        if crash(A.train, B.train):
-            print_track(track, A.train, B.train, A.name, B.name)
+        if crash(A.train, B.train):           
             return i
+        time.sleep(0.1)        
+    return -1
 
-        time.sleep(1)
-        
-    return 0
-
+#print(train_crash(TRACK_EX, "Aaaa", 0, "Bbbbbbbbbbb", 0, 1))
 #print(train_crash(TRACK_EX, "Aaaa", 147, "Bbbbbbbbbbb", 288, 1000))
 #print(train_crash(TRACK_EX, "Xxxxxxx", 115, "Cccc", 146, 1000))
-print(train_crash(RABBIT, "ddddddddddD", 10, "Xxxxx", 162, 1000))
+print(train_crash(SNAIL, "ddddddddddD", 10, "Xxxxx", 162, 1000))
+#print(train_crash(SHORT, "Aaaaaaaaaaaaaaaaaaaaaaa", 9, "Ee", 41, 1000))
