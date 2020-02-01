@@ -38,14 +38,16 @@ SNAIL = """\
     /---------------------\\               /-\\ /-\\  
    //---------------------\\\\              | | | |  
   //  /-------------------\\\\\\             | / | /  
-\\----------------------------------------------/ 
   ||  |/------------------\\\\\\\\            |/  |/   
   ||  ||                   \\\\\\\\           ||  ||   
   \\\\  ||                   | \\\\\\          ||  ||   
    \\\\-//                   | || \\---------/\\--/|   
 /-\\ \\-/                    \\-/|                |   
 |  \\--------------------------/                |   
+\\----------------------------------------------/   
 """
+
+
 SHORT = """\
 /----\\     /----\\ 
 |     \\   /     | 
@@ -75,11 +77,9 @@ def print_track(track, a_train, b_train, a_name, b_name):
                         ch = b_name.upper()
                 else:
                     ch = track[i][j]
-                    
-                print(ch, end='')
-                    
             else:
-                print(' ', end='')
+                ch = ' '
+            print(ch, end='')
         print()
 
 
@@ -131,14 +131,14 @@ class Train():
         
         for i in range(train_pos - 1):
             next(g)
-        if train_pos == 0:
-            engine = [1, zero_pos]
-        else:
+        if train_pos:
             engine = next(g)
+        else:
+            engine = [1, zero_pos]
         train = [engine]
         if self.clockwise: 
             g = gen_coords(self.track, next(g), engine) 
-        for _ in range(1, self.n):
+        for i in range(1, self.n):
             train.append(next(g))                
         return train
 
@@ -184,7 +184,7 @@ def train_crash(track, a_train, a_train_pos, b_train, b_train_pos, limit):
 
     A = Train(a_train, a_train_pos, track, zero_pos)
     B = Train(b_train, b_train_pos, track, zero_pos)
-    print_track(track, A.train, B.train, A.name, B.name)
+
     if check_start_crash(A.train, B.train):
         return  0
 
@@ -192,13 +192,12 @@ def train_crash(track, a_train, a_train_pos, b_train, b_train_pos, limit):
         A.tuh_tuh()
         B.tuh_tuh()
         print_track(track, A.train, B.train, A.name, B.name)
-        if crash(A.train, B.train):           
+        if crash(A.train, B.train):
             return i
-        time.sleep(0.1)        
-    return -1
+        time.sleep(0.2)
 
 #print(train_crash(TRACK_EX, "Aaaa", 0, "Bbbbbbbbbbb", 0, 1))
 #print(train_crash(TRACK_EX, "Aaaa", 147, "Bbbbbbbbbbb", 288, 1000))
 #print(train_crash(TRACK_EX, "Xxxxxxx", 115, "Cccc", 146, 1000))
-print(train_crash(SNAIL, "ddddddddddD", 10, "Xxxxx", 162, 1000))
+#print(train_crash(SNAIL, "ddddddddddD", 10, "Xxxxx", 162, 1000))
 #print(train_crash(SHORT, "Aaaaaaaaaaaaaaaaaaaaaaa", 9, "Ee", 41, 1000))

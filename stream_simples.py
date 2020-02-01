@@ -35,7 +35,7 @@ class Primes:
                     start = (2 * x - ost - 1) // 2
                 else:
                     start = (x - ost - 1) // 2
-                smpl[start::x] = False                    
+                smpl[start::x] = False             
             s = [board + i * 2 + 1 for i, k in enumerate(smpl) if k]
             primes.extend(s)
             board = right_b
