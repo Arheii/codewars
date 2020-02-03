@@ -4,12 +4,12 @@ Created on Sat Feb  1 23:26:54 2020
 
 @author: Arh
 """
-"""        0 1 2 3 4 5 6 7 8 """
+
 puzzle = [[5,3,0,0,7,0,0,0,0],
           [6,0,0,1,9,5,0,0,0],
           [0,9,8,0,0,0,0,6,0],
           [8,0,0,0,6,0,0,0,3],
-          [4,0,0,8,0,3,0,0,1], # <- 4,7
+          [4,0,0,8,0,3,0,0,1],
           [7,0,0,0,2,0,0,0,6],
           [0,6,0,0,0,0,2,8,0],
           [0,0,0,4,1,9,0,0,5],
@@ -76,12 +76,20 @@ test =  [[4, 7, 0, 3, 5, 2, 9, 6, 8],
          [6, 1, 7, 2, 8, 3, 4, 5, 9]]
 
 import numpy as np
+<<<<<<< HEAD
+=======
+
+>>>>>>> parent of cee1d7a... Update sudoku_very_hard.py
 
 def sudoku_solver(puzzle):
     """return the solved puzzle as a 2d array of 9 x 9"""
     pzl = np.array(puzzle)
     if not is_sudoku(pzl):
+<<<<<<< HEAD
         raise IOError('Incorrect field')
+=======
+        return False
+>>>>>>> parent of cee1d7a... Update sudoku_very_hard.py
 
     zeros = {(i, j):range(1,10) for i in range(9) for j in range(9) if pzl[i,j]==0}
     dk = ((0,1,2),(3,4,5),(6,7,8))
@@ -98,6 +106,7 @@ def sudoku_solver(puzzle):
                 if snapshots:
                     print("otkat na", len(snapshots) - 1)
                     pzl, zeros = snapshots.pop()
+<<<<<<< HEAD
                 elif solved_copy: # Есть только одно решение
                     return solved_copy
         if check_dif == len(zeros): # Если нет найденных, увеличиваем глубину поиска
@@ -105,19 +114,38 @@ def sudoku_solver(puzzle):
                 temp, zeros[key] = zeros[key][0], zeros[key][1:]
                 snapshots.append((pzl.copy(), zeros.copy()))
                 zeros[key] = [temp]
+=======
+                elif used_predictions: # Есть только одно решение
+                    return pzl, zeros
+        if check_dif == len(zeros): # Если нет найденных, увеличиваем глубину поиска
+            if deep > 2: # Если ничего не помогает, начинаем предполагать
+                temp, zeros[key] = zeros[key][0], zeros[key][1:]
+                snapshots.append((pzl.copy(), zeros.copy()))
+                zeros[key] = [temp]
+                used_predictions = True
+>>>>>>> parent of cee1d7a... Update sudoku_very_hard.py
             else:
                 deep += 1
         else:
-            deep = 0
+            deep -= 1
             
         if not zeros:
             if solved_copy:
+<<<<<<< HEAD
                 raise IOError('More then 1 solution')
             if snapshots:
                 solved_copy = pzl.tolist()
                 pzl, zeros = snapshots.pop()
             else:
                 return pzl.tolist()
+=======
+                return False
+            elif snapshots:
+                solved_copy = pzl.copy()
+                pzl, zeros = snapshots.pop()
+            else:
+                return pzl, snapshots
+>>>>>>> parent of cee1d7a... Update sudoku_very_hard.py
 
 
 def check_cell(pzl, zeros, n, m, dk, deep):
@@ -129,6 +157,10 @@ def check_cell(pzl, zeros, n, m, dk, deep):
     digits = [x for x in digits if x not in square.flat]
     if deep:
         pot = sum([zeros[(n,j)] for j in range(9) if pzl[n,j]==0], [])
+<<<<<<< HEAD
+=======
+#        print(potential, 'for', (n,m))
+>>>>>>> parent of cee1d7a... Update sudoku_very_hard.py
         found1 = list(filter(lambda x: list(pot).count(x)==1, digits))
         pot = sum([zeros[(i,m)] for i in range(9) if pzl[i,m]==0], [])
         found2 = list(filter(lambda x: list(pot).count(x)==1, digits))
@@ -136,6 +168,7 @@ def check_cell(pzl, zeros, n, m, dk, deep):
         pot = sum([zeros[(i,j)] for i,j in square if pzl[i,j]==0], [])
         found3 = list(filter(lambda x: pot.count(x)==1, digits))
         found = max(found1, found2, found3)
+<<<<<<< HEAD
         if len(found) > 1: # backward to previous snapshot pzl
             return []
         elif len(found) == 1:
@@ -202,16 +235,21 @@ def check_friends(zeros, friends, key):
     if len(found) > 1: # for backward to previous version pzl
         return []
     elif len(found) == 1:
+=======
+        if len(found) > 1: # for backward to previous version pzl
+            return []
+        elif len(found) == 1:
+>>>>>>> parent of cee1d7a... Update sudoku_very_hard.py
 #            print('found', (n,m), found, 'square')
-        return found        
+            return found
+        
     return digits
-
 
 def is_sudoku(pzl):
     """ Return True if we have correctly Sudoku field """
-    if pzl.dtype == '<U1' or pzl.shape != (9,9):
+    if pzl.dtype != 'int32' or pzl.shape != (9,9):
         return False
-    if np.any(pzl < 0) or np.any(pzl > 9):
+    if np.all(pzl < 0) or np.all(pzl > 9):
         return False
     if np.sum(pzl != 0) < 17:
         return False
@@ -229,6 +267,7 @@ def is_sudoku(pzl):
 
 from time import time
 start = time()
+<<<<<<< HEAD
 print('\npuzzle\n')
 answer = sudoku_solver(puzzle)
 print(np.array(answer))
@@ -236,21 +275,43 @@ print(answer == solution)
 
 print('\npuzzle_hard\n')
 answer = sudoku_solver(puzzle_hard)
+=======
+answer, zeros = sudoku_solver(puzzle)
+print(np.array(answer))
+print(answer == solution)
+
+answer, zeros = sudoku_solver(puzzle_hard)
+>>>>>>> parent of cee1d7a... Update sudoku_very_hard.py
 print(np.array(answer))
 print(answer == solution_hard)
-print("time first 2", time() - start)
 
+<<<<<<< HEAD
 print('\ntest\n')
 answer = sudoku_solver(test)
+=======
+answer, snapshots = sudoku_solver(test)
+>>>>>>> parent of cee1d7a... Update sudoku_very_hard.py
 print(np.array(answer))
+print(answer == solution_hard)
 
+<<<<<<< HEAD
 print('\nincorrect1\n')
 answer = sudoku_solver(puzzle_inc)
+=======
+answer, snapshots = sudoku_solver(puzzle_inc)
+>>>>>>> parent of cee1d7a... Update sudoku_very_hard.py
 print(np.array(answer))
+print(answer == solution_hard)
 
+<<<<<<< HEAD
 print('\nincorrect2\n')
 answer = sudoku_solver(puzzle_inc2)
+=======
+answer, snapshots = sudoku_solver(puzzle_inc2)
+>>>>>>> parent of cee1d7a... Update sudoku_very_hard.py
 print(np.array(answer))
+print(answer == solution_hard)
+
 
 end = time()
 print('time ', end - start)
