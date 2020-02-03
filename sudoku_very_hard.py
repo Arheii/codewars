@@ -78,17 +78,23 @@ test =  [[4, 7, 0, 3, 5, 2, 9, 6, 8],
 import numpy as np
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
 
 >>>>>>> parent of cee1d7a... Update sudoku_very_hard.py
 =======
 
 >>>>>>> parent of cee1d7a... Update sudoku_very_hard.py
+=======
+from itertools import product
+from copy import deepcopy
+>>>>>>> parent of 2e4fedb... Update sudoku_very_hard.py
 
 def sudoku_solver(puzzle):
     """return the solved puzzle as a 2d array of 9 x 9"""
     pzl = np.array(puzzle)
     if not is_sudoku(pzl):
+<<<<<<< HEAD
 <<<<<<< HEAD
         raise IOError('Incorrect field')
 =======
@@ -100,17 +106,38 @@ def sudoku_solver(puzzle):
 
     zeros = {(i, j):range(1,10) for i in range(9) for j in range(9) if pzl[i,j]==0}
     dk = ((0,1,2),(3,4,5),(6,7,8))
+=======
+        return False
+    
+    # Inicialisation
+    ind_9x9 = product(range(9), range(9))
+    zeros = {key:list(range(1,10)) for key in product(range(9), range(9)) if pzl[key]==0}
+    friends = {key:nearest(pzl, *key) for key in product(range(9), range(9))}
+#    return pzl, friends
+    for key in ind_9x9:
+        if pzl[key]:
+            del_x_and_key_from_dicts(zeros, friends, pzl[key], key, start=True)
+#    return pzl, zeros, friends
+#    print(zeros, '\n\n', friends)
+            
+>>>>>>> parent of 2e4fedb... Update sudoku_very_hard.py
     deep = 0
-    solved_copy = False
+    solved_pzl = False
     snapshots = []
     while True:
         check_dif = len(zeros)
+#        print(check_dif)
         for key in set(zeros.keys()):
-            zeros[key] = check_cell(pzl, zeros, *key, dk, deep=deep)
+            if len(zeros[key]) > 1:
+                zeros[key] = check_friends(zeros, friends, key)
             if len(zeros[key]) == 1:
+#                print('найдено', key, zeros[key][0], zeros[key][0]==sol[key])
                 pzl[key] = zeros.pop(key)[0]
+                del_x_and_key_from_dicts(zeros, friends, pzl[key], key)
             elif not zeros[key]: # была ошибка в предсказании
+#                print("COLLISION FOUND, BACK TO STEP", len(snapshots) - 1)
                 if snapshots:
+<<<<<<< HEAD
                     print("otkat na", len(snapshots) - 1)
                     pzl, zeros = snapshots.pop()
 <<<<<<< HEAD
@@ -140,12 +167,39 @@ def sudoku_solver(puzzle):
 >>>>>>> parent of cee1d7a... Update sudoku_very_hard.py
 =======
 >>>>>>> parent of cee1d7a... Update sudoku_very_hard.py
+=======
+#                    print("otkat na", len(snapshots) - 1)
+                    pzl, zeros, friends = snapshots.pop()
+                elif solved_pzl: # Есть только одно решение
+                    print('1st way')
+                    return solved_pzl, zeros
+                else:
+#                    print("Переделывай")
+                    return pzl, zeros
+                
+        print(len(zeros))
+        if check_dif == len(zeros): # Если нет найденных, увеличиваем глубину поиска
+            if deep > 3: # Если ничего не помогает, начинаем предполагать
+                try:
+#                    print('used timeline')
+#                    print(key, zeros[key])
+                    temp, zeros[key] = zeros[key][0], zeros[key][1:]
+#                    pzl, zeros, friends = snapshots.pop()
+                    snapshots.append((pzl.copy(), deepcopy(zeros), deepcopy(friends)))
+                    zeros[key] = [temp]
+#                    print(temp)
+                    
+                except:
+#                    print('err timeline')
+                    return pzl, zeros
+>>>>>>> parent of 2e4fedb... Update sudoku_very_hard.py
             else:
                 deep += 1
         else:
             deep -= 1
             
         if not zeros:
+<<<<<<< HEAD
             if solved_copy:
 <<<<<<< HEAD
 <<<<<<< HEAD
@@ -223,6 +277,17 @@ def is_sudoku(pzl):
             if c1 or c2 or c3:
                 return False
     return True
+=======
+            if solved_pzl: # нашлось второе решение
+                raise IOError('found more then 1 solution')
+                return False, zeros
+            if snapshots: # ищем другие решения
+                print('!Found 1 desition')
+                solved_pzl = pzl.tolist()
+                pzl, zeros, friends = snapshots.pop()
+            else:
+                return pzl.tolist(), snapshots
+>>>>>>> parent of 2e4fedb... Update sudoku_very_hard.py
 
             
 def nearest(pzl, n, m):
@@ -305,11 +370,12 @@ start = time()
 <<<<<<< HEAD
 <<<<<<< HEAD
 print('\npuzzle\n')
-answer = sudoku_solver(puzzle)
+answer, zeros = sudoku_solver(puzzle)
 print(np.array(answer))
 print(answer == solution)
 
 print('\npuzzle_hard\n')
+<<<<<<< HEAD
 answer = sudoku_solver(puzzle_hard)
 =======
 answer, zeros = sudoku_solver(puzzle)
@@ -324,42 +390,57 @@ print(answer == solution)
 >>>>>>> parent of cee1d7a... Update sudoku_very_hard.py
 answer, zeros = sudoku_solver(puzzle_hard)
 >>>>>>> parent of cee1d7a... Update sudoku_very_hard.py
+=======
+answer, zeros = sudoku_solver(puzzle_hard)
+>>>>>>> parent of 2e4fedb... Update sudoku_very_hard.py
 print(np.array(answer))
 print(answer == solution_hard)
 
 <<<<<<< HEAD
 <<<<<<< HEAD
 print('\ntest\n')
+<<<<<<< HEAD
 answer = sudoku_solver(test)
 =======
 =======
 >>>>>>> parent of cee1d7a... Update sudoku_very_hard.py
 answer, snapshots = sudoku_solver(test)
 >>>>>>> parent of cee1d7a... Update sudoku_very_hard.py
+=======
+answer, snapshots = sudoku_solver(test)
+>>>>>>> parent of 2e4fedb... Update sudoku_very_hard.py
 print(np.array(answer))
 print(answer == solution_hard)
 
 <<<<<<< HEAD
 <<<<<<< HEAD
 print('\nincorrect1\n')
+<<<<<<< HEAD
 answer = sudoku_solver(puzzle_inc)
 =======
 =======
 >>>>>>> parent of cee1d7a... Update sudoku_very_hard.py
 answer, snapshots = sudoku_solver(puzzle_inc)
 >>>>>>> parent of cee1d7a... Update sudoku_very_hard.py
+=======
+answer, snapshots = sudoku_solver(puzzle_inc)
+>>>>>>> parent of 2e4fedb... Update sudoku_very_hard.py
 print(np.array(answer))
 print(answer == solution_hard)
 
 <<<<<<< HEAD
 <<<<<<< HEAD
 print('\nincorrect2\n')
+<<<<<<< HEAD
 answer = sudoku_solver(puzzle_inc2)
 =======
 =======
 >>>>>>> parent of cee1d7a... Update sudoku_very_hard.py
 answer, snapshots = sudoku_solver(puzzle_inc2)
 >>>>>>> parent of cee1d7a... Update sudoku_very_hard.py
+=======
+answer, snapshots = sudoku_solver(puzzle_inc2)
+>>>>>>> parent of 2e4fedb... Update sudoku_very_hard.py
 print(np.array(answer))
 print(answer == solution_hard)
 
