@@ -125,7 +125,7 @@ def sudoku_solver(puzzle):
     if not is_sudoku(pzl):
         raise ValueError('Incorrect field')
     # Initialization
-    zeros = {key:list(range(1,10)) for key in product(range(9), range(9)) if pzl[key]==0}
+    zeros = {key:set(range(1,10)) for key in product(range(9), range(9)) if pzl[key]==0}
     friends = {key:nearest(pzl, *key) for key in product(range(9), range(9))}
     for key in product(range(9), range(9)):
         if pzl[key]:
@@ -141,7 +141,7 @@ def sudoku_solver(puzzle):
                 zeros[key] = check_friends(zeros, friends, key)
             if len(zeros[key]) == 1:
                 changes = True
-                pzl[key] = zeros.pop(key)[0]
+                pzl[key] = zeros.pop(key).pop()
                 del_x_and_key_from_dicts(zeros, friends, pzl[key], key)
             elif not zeros[key]: # founded collision
                 if len(snapshots) > 0: # back to the last state
@@ -151,9 +151,9 @@ def sudoku_solver(puzzle):
 
         if not changes:
             if deep > 1:
-                temp, zeros[key] = zeros[key][0], zeros[key][1:]
+                temp  = zeros[key].pop()
                 snapshots.append((pzl.copy(), deepcopy(zeros), deepcopy(friends)))
-                zeros[key] = [temp]
+                zeros[key] = set([temp])
             else:
                 deep += 1
         else:
@@ -163,56 +163,10 @@ def sudoku_solver(puzzle):
             if solved_pzl: # founded second solution
                 raise ValueError('founded more then 1 solution')
             if snapshots and len(snapshots[-1][1]) < 100: # looking for other solutions
-                print(len(snapshots))
-                
                 solved_pzl = pzl.tolist()
                 pzl, zeros, friends = snapshots.pop()
-                print(len(zeros))
             else:
                 return pzl.tolist()
-
-            
-def nearest(pzl, n, m):
-    """ returns coords of '0'.neighbors in a line, column, cell 3x3 """
-    dk = ((0,1,2),(3,4,5),(6,7,8))
-    row = [(n,j) for j in range(9) if pzl[n,j]==0 and (n, j) != (n, m)]
-    col = [(i,m) for i in range(9) if pzl[i,m]==0 and (i, m) != (n, m)]
-    squared = [(i,j) for i in dk[n//3] for j in dk[m//3] if pzl[i,j]==0 and (i, j)!=(n, m)]
-    return (row, col, squared)
-
-
-def del_x_and_key_from_dicts(zeros, friends, x, key, start=False):
-    """ deletes a value x in its row, column and 3cell
-    also delete possible keys for friends """
-    row, col, squared = friends.pop(key)
-    for k in set(row+col+squared):
-        if x in zeros[k]:
-            zeros[k].remove(x)
-        if not start:
-            if k in row:
-                friends[k][0].remove(key)
-            if k in col:
-                friends[k][1].remove(key)
-            if k in squared:
-                friends[k][2].remove(key)
-
-
-    
-def check_friends(zeros, friends, key):
-    """ check if we have only one possible digit in block """
-    row, col, squared = friends[key]
-    digits = set(zeros[key])
-    p1 = digits - set(sum([zeros[k] for k in row], []))
-    p2 = digits - set(sum([zeros[k] for k in col], []))
-    p3 = digits - set(sum([zeros[k] for k in squared], []))
-    found = p1 | p2 | p3
-    if not found:
-        return zeros[key]
-    elif len(found) == 1: 
-        return [found.pop()]    
-    else:
-        return []
-    
 
 
 def is_sudoku(pzl):
@@ -233,7 +187,43 @@ def is_sudoku(pzl):
                 return False
     return True
 
+            
+def nearest(pzl, n, m):
+    """ returns coords of '0'.neighbors in a line, column, cell 3x3 """
+    dk = ((0,1,2),(3,4,5),(6,7,8))
+    row = set((n,j) for j in range(9) if pzl[n,j]==0 and (n, j) != (n, m))
+    col = set((i,m) for i in range(9) if pzl[i,m]==0 and (i, m) != (n, m))
+    squared = set((i,j) for i in dk[n//3] for j in dk[m//3] if pzl[i,j]==0 and (i, j)!=(n, m))
+    return (row, col, squared)
 
+
+def del_x_and_key_from_dicts(zeros, friends, x, key, start=False):
+    """ deletes a value x in its row, column and 3cell
+    also delete possible keys for friends """
+    row, col, squared = friends.pop(key)
+    for k in row | col | squared:
+        zeros[k].discard(x)
+        if not start:
+            friends[k][0].discard(key)
+            friends[k][1].discard(key)
+            friends[k][2].discard(key)
+
+    
+def check_friends(zeros, friends, key):
+    """ check if we have only one possible digit in block """
+    row, col, squared = friends[key]
+    digits = set(zeros[key])
+    p1 = digits - set.union(*[zeros[k] for k in row])
+    p2 = digits - set.union(*[zeros[k] for k in col])
+    p3 = digits - set.union(*[zeros[k] for k in squared])
+    found = p1 | p2 | p3
+    if not found:
+        return zeros[key]
+    elif len(found) == 1: 
+        return [found.pop()]    
+    else:
+        return []
+    
 
 from time import time
 start = time()
