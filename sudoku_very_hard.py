@@ -45,7 +45,7 @@ solution_hard = [[3, 4, 6, 1, 2, 7, 9, 5, 8],
                 [6, 2, 4, 7, 5, 9, 3, 8, 1],
                 [1, 7, 3, 8, 6, 2, 5, 9, 4]]
 
-puzzle_inc =   [[2, 7, 0, 6, 0, 8, 0, 4, 0],
+puzzle_inc1 =   [[2, 7, 0, 6, 0, 8, 0, 4, 0],
                 [0, 0, 8, 0, 0, 0, 2, 0, 0],
                 [0, 9, 0, 0, 0, 0, 3, 0, 0],
                 [0, 5, 0, 0, 8, 2, 0, 0, 0],
@@ -65,6 +65,36 @@ puzzle_inc2 =  [[4, 7, 0, 3, 0, 2, 0, 6, 0],
                 [0, 0, 0, 6, 0, 5, 0, 0, 0],
                 [0, 0, 0, 2, 8, 0, 0, 5, 0]]
 
+puzzle_inc3 =  [[5, 0, 0, 0, 0, 0, 1, 0, 0],
+                [0, 4, 0, 2, 0, 8, 0, 6, 0],
+                [0, 0, 3, 0, 0, 0, 0, 0, 5],
+                [9, 0, 6, 0, 7, 0, 4, 0, 3],
+                [0, 0, 0, 4, 0, 0, 2, 0, 0],
+                [0, 7, 0, 0, 2, 3, 0, 1, 0],
+                [0, 3, 0, 7, 0, 0, 0, 5, 0],
+                [0, 0, 7, 0, 0, 5, 0, 0, 0],
+                [4, 0, 5, 0, 1, 0, 7, 0, 8]]
+
+puzzle_inc4 =  [[2, 7, 0, 6, 0, 8, 0, 4, 0],
+                [0, 0, 8, 0, 0, 0, 2, 0, 0],
+                [0, 9, 0, 0, 0, 0, 3, 0, 0],
+                [0, 5, 0, 0, 8, 2, 0, 0, 0],
+                [0, 0, 0, 5, 0, 6, 0, 0, 0],
+                [0, 0, 0, 9, 1, 0, 0, 5, 0],
+                [0, 0, 7, 0, 0, 0, 0, 8, 0],
+                [0, 0, 2, 0, 0, 0, 9, 0, 0],
+                [0, 6, 0, 2, 0, 3, 0, 7, 4],]
+
+puzzle_inc5 =  [[0, 0, 0, 4, 0, 0, 0, 0, 0],
+                [0, 0, 9, 0, 1, 5, 0, 2, 0],
+                [0, 0, 7, 2, 0, 0, 0, 6, 0],
+                [9, 0, 4, 0, 0, 0, 2, 0, 0],
+                [0, 0, 0, 3, 0, 9, 0, 0, 0],
+                [0, 0, 6, 0, 0, 0, 9, 0, 8],
+                [0, 6, 0, 0, 0, 8, 5, 0, 0],
+                [0, 1, 0, 9, 4, 0, 8, 0, 0],
+                [0, 0, 0, 0, 0, 7, 0, 0, 0]]
+
 test =  [[4, 7, 0, 3, 5, 2, 9, 6, 8],
          [5, 3, 9, 7, 6, 8, 2, 4, 1],
          [2, 8, 6, 9, 4, 1, 7, 3, 5],
@@ -75,6 +105,16 @@ test =  [[4, 7, 0, 3, 5, 2, 9, 6, 8],
          [9, 2, 4, 6, 7, 5, 1, 8, 3],
          [6, 1, 7, 2, 8, 3, 4, 5, 9]]
 
+multi_answer = [[0, 0, 3, 4, 5, 6, 7, 8, 9],
+                [4, 5, 6, 7, 8, 9, 0, 0, 3],
+                [7, 8, 9, 0, 0, 3, 4, 5, 6],
+                [0, 3, 4, 5, 6, 7, 8, 9, 0],
+                [5, 6, 7, 8, 9, 0, 0, 3, 4],
+                [8, 9, 0, 0, 3, 4, 5, 6, 7],
+                [3, 4, 5, 6, 7, 8, 9, 0, 0],
+                [6, 7, 8, 9, 0, 0, 3, 4, 5],
+                [9, 0, 0, 3, 4, 5, 6, 7, 8]]
+
 import numpy as np
 from itertools import product
 from copy import deepcopy
@@ -83,73 +123,53 @@ def sudoku_solver(puzzle):
     """return the solved puzzle as a 2d array of 9 x 9"""
     pzl = np.array(puzzle)
     if not is_sudoku(pzl):
-        return False
-    
-    # Inicialisation
-    ind_9x9 = product(range(9), range(9))
+        raise ValueError('Incorrect field')
+    # Initialization
     zeros = {key:list(range(1,10)) for key in product(range(9), range(9)) if pzl[key]==0}
     friends = {key:nearest(pzl, *key) for key in product(range(9), range(9))}
-#    return pzl, friends
-    for key in ind_9x9:
+    for key in product(range(9), range(9)):
         if pzl[key]:
-            del_x_and_key_from_dicts(zeros, friends, pzl[key], key, start=True)
-#    return pzl, zeros, friends
-#    print(zeros, '\n\n', friends)
-            
+            del_x_and_key_from_dicts(zeros, friends, pzl[key], key, start=True)     
     deep = 0
     solved_pzl = False
     snapshots = []
+    
     while True:
-        check_dif = len(zeros)
-#        print(check_dif)
+        changes = False
         for key in set(zeros.keys()):
-            if len(zeros[key]) > 1:
+            if len(zeros[key]) > 1 and deep:
                 zeros[key] = check_friends(zeros, friends, key)
             if len(zeros[key]) == 1:
-                print('найдено', key, zeros[key][0])
+                changes = True
                 pzl[key] = zeros.pop(key)[0]
                 del_x_and_key_from_dicts(zeros, friends, pzl[key], key)
-            elif not zeros[key]: # была ошибка в предсказании
-                print("COLLISION FOUND, BACK TO STEP", len(snapshots) - 1)
-                if len(snapshots) > 0:
-#                    print("otkat na", len(snapshots) - 1)
+            elif not zeros[key]: # founded collision
+                if len(snapshots) > 0: # back to the last state
                     pzl, zeros, friends = snapshots.pop()
-                elif solved_pzl: # Есть только одно решение
-                    print('1st way')
-                    print(pzl, '\n', snapshots)
-                    return solved_pzl, zeros
-#                else:
-##                    print("Переделывай")
-#                    return pzl, zeros
-                
-#        print(len(zeros))
-        if check_dif == len(zeros): # Если нет найденных, увеличиваем глубину поиска
-            if deep > 3: # Если ничего не помогает, начинаем предполагать
+                elif solved_pzl: # only one solution
+                    return solved_pzl
 
-                print('used timeline')
-                print(key, zeros[key])
+        if not changes:
+            if deep > 1:
                 temp, zeros[key] = zeros[key][0], zeros[key][1:]
-                print('temp, save_key', temp, zeros[key])
-#                    pzl, zeros, friends = snapshots.pop()
                 snapshots.append((pzl.copy(), deepcopy(zeros), deepcopy(friends)))
                 zeros[key] = [temp]
-#                    print(temp)
-                    
             else:
                 deep += 1
         else:
             deep = 0
             
         if not zeros:
-            if solved_pzl: # нашлось второе решение
-                raise IOError('found more then 1 solution')
-                return False, zeros
-            if snapshots: # ищем другие решения
-                print('!FOUND 1 desition')
+            if solved_pzl: # founded second solution
+                raise ValueError('founded more then 1 solution')
+            if snapshots and len(snapshots[-1][1]) < 100: # looking for other solutions
+                print(len(snapshots))
+                
                 solved_pzl = pzl.tolist()
                 pzl, zeros, friends = snapshots.pop()
+                print(len(zeros))
             else:
-                return pzl.tolist(), snapshots
+                return pzl.tolist()
 
             
 def nearest(pzl, n, m):
@@ -157,14 +177,14 @@ def nearest(pzl, n, m):
     dk = ((0,1,2),(3,4,5),(6,7,8))
     row = [(n,j) for j in range(9) if pzl[n,j]==0 and (n, j) != (n, m)]
     col = [(i,m) for i in range(9) if pzl[i,m]==0 and (i, m) != (n, m)]
-    squared = [(i,j) for i in dk[n//3] for j in dk[m//3] if pzl[i,j]==0 and (i, j) != (n, m)]
+    squared = [(i,j) for i in dk[n//3] for j in dk[m//3] if pzl[i,j]==0 and (i, j)!=(n, m)]
     return (row, col, squared)
 
 
 def del_x_and_key_from_dicts(zeros, friends, x, key, start=False):
-    """ delete found x from line, col and squared.
-    also delete possible keys from friends """
-    row, col, squared = friends[key]
+    """ deletes a value x in its row, column and 3cell
+    also delete possible keys for friends """
+    row, col, squared = friends.pop(key)
     for k in set(row+col+squared):
         if x in zeros[k]:
             zeros[k].remove(x)
@@ -175,26 +195,24 @@ def del_x_and_key_from_dicts(zeros, friends, x, key, start=False):
                 friends[k][1].remove(key)
             if k in squared:
                 friends[k][2].remove(key)
-    friends.pop(key)
+
 
     
 def check_friends(zeros, friends, key):
-#    print('ch_f for', key, '| zeros', zeros[key], '\n friends', friends[key])
+    """ check if we have only one possible digit in block """
     row, col, squared = friends[key]
-    digits = zeros[key]
-    pot1 = sum([zeros[k] for k in row], [])
-    pot2 = sum([zeros[k] for k in col], [])
-    pot3 = sum([zeros[k] for k in squared], [])
-    found1 = list(filter(lambda x: pot1.count(x)==0, digits))
-    found2 = list(filter(lambda x: pot2.count(x)==0, digits))
-    found3 = list(filter(lambda x: pot3.count(x)==0, digits))
-    found = max(found1, found2, found3)
-    if len(found) > 1: # for backward to previous version pzl
+    digits = set(zeros[key])
+    p1 = digits - set(sum([zeros[k] for k in row], []))
+    p2 = digits - set(sum([zeros[k] for k in col], []))
+    p3 = digits - set(sum([zeros[k] for k in squared], []))
+    found = p1 | p2 | p3
+    if not found:
+        return zeros[key]
+    elif len(found) == 1: 
+        return [found.pop()]    
+    else:
         return []
-    elif len(found) == 1:
-#            print('found', (n,m), found, 'square')
-        return found        
-    return digits
+    
 
 
 def is_sudoku(pzl):
@@ -207,10 +225,10 @@ def is_sudoku(pzl):
         return False
     for x in range(1,10):
         for i in range(9):
-            c1 = np.sum(pzl[i,:] == x) > 2
-            c2 = np.sum(pzl[i,:] == x) > 2
+            c1 = np.sum(pzl[i,:] == x) > 1
+            c2 = np.sum(pzl[i,:] == x) > 1
             square = pzl[i//3*3:(i//3+1)*3, i%3*3:(i%3+1)*3]
-            c3 = np.sum(square == x) > 2
+            c3 = np.sum(square == x) > 1
             if c1 or c2 or c3:
                 return False
     return True
@@ -219,29 +237,39 @@ def is_sudoku(pzl):
 
 from time import time
 start = time()
-print('\npuzzle\n')
-answer, zeros = sudoku_solver(puzzle)
-print(np.array(answer))
-print(answer == solution)
-
-print('\npuzzle_hard\n')
-answer, zeros = sudoku_solver(puzzle_hard)
-print(np.array(answer))
-print(answer == solution_hard)
-print("time first 2", time() - start)
-
-print('\ntest\n')
-answer, snapshots = sudoku_solver(test)
-print(np.array(answer))
-
-print('\nincorrect1\n')
-answer, snapshots = sudoku_solver(puzzle_inc)
-print(np.array(answer))
-
-print('\nincorrect2\n')
-answer, snapshots = sudoku_solver(puzzle_inc2)
-print(np.array(answer))
+for i in range (10):
+    print('\npuzzle\n')
+    answer = sudoku_solver(puzzle)
+    print(np.array(answer))
+    print(answer == solution)
+    
+    print('\npuzzle_hard\n')
+    answer = sudoku_solver(puzzle_hard)
+    print(np.array(answer))
+    print(answer == solution_hard)
+#    print("time first 2", time() - start)
+    
+    print('\ntest\n')
+    answer = sudoku_solver(test)
+    print(np.array(answer))
+    
+    print('\nincorrect1\n')
+    answer = sudoku_solver(puzzle_inc1)
+    print(np.array(answer))
+    
+    print('\nincorrect2\n')
+    answer = sudoku_solver(puzzle_inc2)
+    print(np.array(answer))
+    
+    print('\nincorrect4\n')
+    answer = sudoku_solver(puzzle_inc4)
+    print(np.array(answer))
 
 end = time()
 print('time ', end - start)
 izm.append(end - start)
+ 
+#print('\nincorrect4\n')
+#answer = sudoku_solver(puzzle_hard)
+#print(np.array(answer))
+    
